@@ -1,0 +1,66 @@
+import 'package:flutter/material.dart';
+import 'package:call_log/call_log.dart';
+import 'package:permission_handler/permission_handler.dart';
+
+void main() => runApp(MyApp());
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: CallLogScreen(),
+    );
+  }
+}
+
+class CallLogScreen extends StatefulWidget {
+  @override
+  _CallLogScreenState createState() => _CallLogScreenState();
+}
+
+class _CallLogScreenState extends State<CallLogScreen> {
+  List<CallLogEntry> _callLogs = [];
+
+  @override
+  void initState() {
+    super.initState();
+    requestPermissions().then((_) {
+      getCallLogs();
+    });
+  }
+
+  Future<void> requestPermissions() async {
+    var status = await Permission.phone.status;
+    if (!status.isGranted) {
+      await Permission.phone.request();
+    }
+  }
+
+  void getCallLogs() async {
+    Iterable<CallLogEntry> entries = await CallLog.get();
+    setState(() {
+      _callLogs = entries.toList();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Call Logs'),
+      ),
+      body: ListView.builder(
+        itemCount: _callLogs.length,
+        itemBuilder: (context, index) {
+          CallLogEntry entry = _callLogs[index];
+          return ListTile(
+            title: Text(entry.name ?? 'Unknown'),
+            subtitle: Text('Duration: ${entry.duration} seconds\nType: ${entry.callType}'),
+            leading: Icon(Icons.phone),
+            trailing: Text(entry.dateTime.toString()),
+          );
+        },
+      ),
+    );
+  }
+}

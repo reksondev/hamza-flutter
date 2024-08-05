@@ -1,0 +1,48 @@
+import 'package:flutter/material.dart';
+import 'package:contacts_service/contacts_service.dart';
+import 'package:permission_handler/permission_handler.dart';
+
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  // This widget is the root of your application.
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(title: const Text('Permission Handler'),),
+        body: const Home(),
+        ),
+    );
+  }
+}
+
+// Home widget
+class Home extends StatelessWidget {
+  const Home({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    
+    return Center(child: TextButton(onPressed: (){
+         checkPermission(Permission.contacts , context);
+    }, child: const Text('Check Permission')));
+
+  }
+}
+
+Future<void> checkPermission(Permission permission , BuildContext context) async{
+  final status = await permission.request();
+  if(status.isGranted){
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Permission is granted'),));
+  }else{
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Permission is not granted'),));
+  }
+}
+
+
